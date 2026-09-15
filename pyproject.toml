@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatching"]
+build-backend = "hatching.build"
+
+[project]
+name = "studybuddy-telegram"
+version = "0.1prod"
+description = "University project Telegram Bot for Finding Study Buddy"
+requires_python = ">=3.10"
+dependecies = [
+  "aiogram",
+  "psycopg[binary]",
+  "psycopg-pool",
+  "pydantic",
+  "pydantic-settings"
+]
