@@ -1,0 +1,6 @@
+---
+- name: "Configure Server Management"
+  ansible.builtin.include_tasks: "{{ item }}"
+  loop:
+    - "install.yml"
+    - "verify.yml"

@@ -1,0 +1,15 @@
+---
+- name: "Verify the Docker's Running"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - docker
+    - containerd
+
+- name: "Add User to Docker's Group"
+  ansible.builtin.user:
+    name: "ubuntu"
+    groups: docker
+    append: yes

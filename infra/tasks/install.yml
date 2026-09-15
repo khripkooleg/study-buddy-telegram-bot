@@ -1,0 +1,50 @@
+---
+- name: "Install Required Packages"
+  ansible.builtin.package:
+    name:
+      - curl
+      - unzip
+      - git
+      - ca-certificates
+      - gnupg
+      - jq
+      - net-tools
+      - postgresql-client
+      - lsb-release
+    state: present
+    update_cache: yes
+
+- name: "Create Directory for Keyrings"
+  ansible.builtin.file:
+    path: "/etc/apt/keyrings"
+    state: "directory"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Curl Docker Instance"
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/ubuntu/gpg"
+    dest: "/etc/apt/keyrings/docker.asc"
+    owner: "0644"
+
+- name: "Set Up Docker Stable Repository"
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ 'noble' if ansible_distribution_release == 'resolute' else ansible_distribution_release }} stable"
+    state: present
+    filename: docker
+
+- name: "Update the Repositories"
+  ansible.builtin.package:
+    update_cache: yes
+
+- name: "Install Docker"
+  ansible.builtin.package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: yes

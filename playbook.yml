@@ -1,0 +1,7 @@
+---
+- name: "Provision Server for Telegram Bot"
+  hosts: production
+  gather_facts: true
+  become: true
+  roles:
+    - infra
