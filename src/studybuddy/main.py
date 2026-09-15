@@ -9,6 +9,9 @@ from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
+from psycopg import AsyncConnection
+from psycopg.rows import DictRow
+
 from studybuddy.config import config
 from studybuddy.db.pool import create_pool
 from studybuddy.middlewares.db import DbSessionMiddleware
@@ -29,8 +32,23 @@ WELCOME_TEXT = (
 )
 
 @core_router.message(CommandStart())
-async def handle_start(message: Message) -> None:
+async def handle_start(
+  message: Message,
+  db_conn: AsyncConnection[DictRow]
+) -> None:
+  tg_id = message.from_user.id
+  username = message.from_user.username
+
+  query = """
+    INSERT INTO users (telegram_id, username)
+    VALUES (%s, %s)
+    ON CONFLICT (telegram_id) DO NOTHING;
+  """
+
+  await db_conn.execute(query, (tg_id, username))
+  await db_conn.commit()
   await message.answer(WELCOME_TEXT)
+
 
 async def main() -> None:
   logging.basicConfig(
