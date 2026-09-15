@@ -1,5 +1,5 @@
 aiogram
-psycopg
+psycopg[binary]
 psycopg_pool
 pydantic
 pydantic-settings
