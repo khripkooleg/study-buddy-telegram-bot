@@ -12,9 +12,13 @@ create table if not exists profiles (
     faculty             varchar(100) not null,
     degree              varchar(25) not null,
     subject             varchar(50) not null,
-    goal                text not null,
+    goal                text,
     is_active           boolean not null default true
 );
+
+create index if not exists idx_profiles_match
+    on profiles (faculty, degree, subject)
+    where is_active;
 
 create table if not exists likes (
     id                  bigserial primary key,
