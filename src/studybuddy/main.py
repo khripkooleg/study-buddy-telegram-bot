@@ -10,6 +10,8 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 
 from studybuddy.config import config
+from studybuddy.db.pool import create_pool
+from studybuddy.middlewares.db import DbSessionMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +38,13 @@ async def main() -> None:
     format = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
   )
 
+  db_pool = create_pool()
+
   dispatcher = Dispatcher()
+
+  dispatcher.workflow_data.update({"db_pool": db_pool})
+  dispatcher.update.middleware(DbSessionMiddleware())
+
   dispatcher.include_router(core_router)
 
   async with Bot(
@@ -44,10 +52,17 @@ async def main() -> None:
     default = DefaultBotProperties(parse_mode=ParseMode.HTML),
   ) as bot:
     await bot.delete_webhook(drop_pending_updates=True)
+
+    logger.info("Opening Database Connection Pool!...")
+    await db_pool.open()
+    await db_pool.wait()
+
     logger.info("StudyBuddy Bot Is Polling!...")
     try:
       await dispatcher.start_polling(bot)
     finally:
+      logger.info("Closing Database Connection Pool!...")
+      await db_pool.close()
       logger.info("StudyBuddy Bot Stopped!...")
 
 if __name__ == "__main__":
