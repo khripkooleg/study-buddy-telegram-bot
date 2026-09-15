@@ -9,21 +9,21 @@ from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
-from studdy-buddy.config import config
+from studybuddy.config import config
 
-logget = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 core_router = Router(name="core")
 
 WELCOME_TEXT = (
-  "Вітаю!🎓\n\n"
+  "Вітаю! 🎓\n\n"
   "Тут ти зможеш знайти з ким готуватися до сесії, робити спільні проєкти та лабораторні роботи!\n"
   "Простими словами - тут зможеш знайти собі ідеального напарника з університету!\n\n"
   "Що для цього потрібно:\n"
   "1. Створити профіль ( свій факультет, курс, предмет )\n"
   "2. За допомогою пошукової системи підібрати найбільш релевантні анкети серед інших.\n"
   "3. Знайти спільну мову та досягти навчальних цілей!\n\n"
-  "Якщо готовий(а) розпочинати, то тисни кнопку нижче, або пиши /profile, щоб створити анкету!"
+  "Якщо готовий(а) розпочинати, то тисни кнопку нижче, або пиши /profile , щоб створити анкету!"
 )
 
 @core_router.message(CommandStart())
@@ -41,7 +41,7 @@ async def main() -> None:
 
   async with Bot(
     token = config.bot.token.get_secret_value(),
-    default = DefaultBotProperties(parse_mdoe=ParseMode.HTML),
+    default = DefaultBotProperties(parse_mode=ParseMode.HTML),
   ) as bot:
     await bot.delete_webhook(drop_pending_updates=True)
     logger.info("StudyBuddy Bot Is Polling!...")
@@ -50,8 +50,8 @@ async def main() -> None:
     finally:
       logger.info("StudyBuddy Bot Stopped!...")
 
-if __name__ = "__main__":
+if __name__ == "__main__":
   try:
     asyncio.run(main())
-  except KeyboardInterrput:
+  except KeyboardInterrupt:
     logger.info("Interrupted by user, shutting down!...")

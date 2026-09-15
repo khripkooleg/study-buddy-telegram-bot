@@ -1,4 +1,4 @@
-from __future__ import annotation
+from __future__ import annotations
 
 import os
 from pathlib import Path
@@ -14,7 +14,7 @@ from pydantic import (
   field_validator,
 )
 
-_VALID_LOG_LEVELS: Final[frozenset[str]] = frozenst(
+_VALID_LOG_LEVELS: Final[frozenset[str]] = frozenset(
   {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
 )
 
@@ -57,7 +57,7 @@ class LoggingConfig(BaseModel):
   level: str = "INFO"
 
   @field_validator("level")
-  @classmethods
+  @classmethod
   def _level_is_known(cls, value: str) -> str:
     upper = value.upper()
     if upper not in _VALID_LOG_LEVELS:
