@@ -45,20 +45,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/studybuddy-bot:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/studybuddy-bot:${{ github.sha }}
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Deploy Via SSH"
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          port: 22
-          script: |
-            cd ~/uni-vm-ansible
-            git pull origin main
-            docker compose pull bot
-            docker compose up -d bot
-            docker image prune -f
