@@ -15,6 +15,7 @@ from psycopg.rows import DictRow
 from studybuddy.config import config
 from studybuddy.db.pool import create_pool
 from studybuddy.middlewares.db import DbSessionMiddleware
+from studybuddy.middlewares.user import UserMiddleware
 from studybuddy.queries.profiles import upsert_user
 from studybuddy.handlers.profiles import profile_router
 from studybuddy.handlers.search import search_router
@@ -73,6 +74,7 @@ async def main() -> None:
 
   dispatcher.workflow_data.update({"db_pool": db_pool})
   dispatcher.update.middleware(DbSessionMiddleware())
+  dp.update.middleware(UserMiddleware())
 
   dispatcher.include_router(core_router)
   dispatcher.include_router(profile_router)
