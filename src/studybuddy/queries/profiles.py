@@ -123,3 +123,23 @@ async def has_completed_profile(conn: AsyncConnection[DictRow], telegram_id: int
   result = await cursor.fetchone()
 
   return result["exists"] if result else False
+
+async def deactivate_profile(conn: AsyncConnection[DictRow], telegram_id: int) -> bool:
+    query = """
+        update profiles p
+        set is_active = false
+        from users u
+        where p.user_id = u.id and u.telegram_id = %s;
+    """
+    cursor = await conn.execute(query, (telegram_id,))
+    return cursor.rowcount > 0
+
+
+async def delete_profile(conn: AsyncConnection[DictRow], telegram_id: int) -> bool:
+    query = """
+        delete from profiles p
+        using users u
+        where p.user_id = u.id and u.telegram_id = %s;
+    """
+    cursor = await conn.execute(query, (telegram_id,))
+    return cursor.rowcount > 0
