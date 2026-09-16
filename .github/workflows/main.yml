@@ -21,8 +21,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install black
           if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
-      - name: "Check Formatting With Black"
-        run: black --check src/
+      - name: "Reformat With Black"
+        run: black src/
+      - name: "Commit & Push Formatted Code"
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format python code with black"
   build-and-push:
     needs: python-test
     runs-on: ubuntu-latest
