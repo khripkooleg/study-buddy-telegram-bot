@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher, Router
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
-from aiogram.types import Message
+from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
 
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow
@@ -22,6 +22,17 @@ from studybuddy.handlers.search import search_router
 logger = logging.getLogger(__name__)
 
 core_router = Router(name="core")
+
+PROFILE_KEYBOARD = ReplyKeyboardMarkup(
+  keyboard = [
+    [
+      KeyboardButton(text="/profile"),
+      KeyboardButton(text="/search"),
+    ]
+  ],
+  resize_keyboard = True,
+  is_persistent = True,
+)
 
 WELCOME_TEXT = (
   "Вітаю! 🎓\n\n"
@@ -48,7 +59,7 @@ async def handle_start(
   await db_conn.commit()
 
   logger.info(f"User Synced: Telegram ID {message.from_user.id} -> Internal ID {user_id}")
-  await message.answer(WELCOME_TEXT)
+  await message.answer(WELCOME_TEXT, reply_markup=PROFILE_KEYBOARD)
 
 async def main() -> None:
   logging.basicConfig(

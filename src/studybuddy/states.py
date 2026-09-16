@@ -6,3 +6,6 @@ class ProfileForm(StatesGroup):
   degree = State()
   subject= State()
   goal = State()
+
+class SearchState(StatesGroup):
+  browsig = State()

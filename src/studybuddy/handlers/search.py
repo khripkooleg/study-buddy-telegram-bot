@@ -1,6 +1,6 @@
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow
 
@@ -8,6 +8,16 @@ from studybuddy.queries.profiles import get_profile, find_matching_profiles
 
 search_router = Router(name="search")
 
+SEARCH_KEYBOARD = ReplyKeyboardMarkup(
+  keyboard = [
+    [
+      KeyboardButton(text="Next"),
+      KeyboardButton(text="Go Back"),
+    ],
+    resize_keyboard = True,
+    is_persistent = True,
+  ]
+)
 
 @search_router.message(Command("search"))
 async def handle_search(
