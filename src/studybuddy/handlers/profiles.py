@@ -45,18 +45,18 @@ async def process_name(message: Message, state: FSMContext) -> None:
 
     await state.update_data(name=message.text.strip())
     await state.set_state(ProfileForm.faculty)
-    await message.answer("На якому факультеті ти навчаєшся?")
+    await message.answer("На якому факультеті ти навчаєшся? (скорочено, наприклад: ФІПТ)")
 
 
 @profile_router.message(ProfileForm.faculty)
 async def process_faculty(message: Message, state: FSMContext) -> None:
-    if not message.text or len(message.text.strip()) > 100:
-        await message.answer("Будь ласка, введи назву факультету (до 100 символів):")
+    if not message.text or len(message.text.strip()) > 10:
+        await message.answer("Будь ласка, введи назву факультету (до 10 символів):")
         return
 
     await state.update_data(faculty=message.text.strip())
     await state.set_state(ProfileForm.degree)
-    await message.answer("Вкажи свій курс або освітній рівень (наприклад: 1 курс, Бакалавр, Магістр):")
+    await message.answer("Вкажи свій курс (наприклад: 1 курс):")
 
 
 @profile_router.message(ProfileForm.degree)
