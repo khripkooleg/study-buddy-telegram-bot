@@ -91,14 +91,14 @@ async def process_degree(callback: CallbackQuery, state: FSMContext) -> None:
 
   await callback.answer()
   await callback.message.answer(
-    f"Обрано: <b>{selected_degree}</b>\n\nЯкий предмет зараз у пріоритеті для вивчення?"
+    f"Обрано: <b>{selected_degree}</b>\n\nЯка спеціальність зараз у пріоритеті для вивчення?"
   )
 
 
 @profile_router.message(ProfileForm.subject)
 async def process_subject(message: Message, state: FSMContext) -> None:
-    if not message.text or len(message.text.strip()) > 50:
-        await message.answer("Введи назву предмета (до 50 символів):")
+    if not message.text or len(message.text.strip()) > 100:
+        await message.answer("Введи назву спеціальності (до 100 символів):")
         return
 
     await state.update_data(subject=message.text.strip())
