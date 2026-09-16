@@ -7,7 +7,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow
 
-from studybuddy.queries.profile import get_profile, save_profile
+from studybuddy.queries.profiles import get_profile, save_profile
 from studybuddy.states import ProfileForm
 
 profile_router = Router(name="profile")
@@ -15,12 +15,12 @@ profile_router = Router(name="profile")
 
 @profile_router.message(Command("profile"))
 async def handle_profile_start(
-    message: Message, 
-    state: FSMContext, 
+    message: Message,
+    state: FSMContext,
     db_conn: AsyncConnection[DictRow]
 ) -> None:
     existing = await get_profile(db_conn, message.from_user.id)
-    
+
     if existing:
         current_info = (
             f"<b>Твій поточний профіль:</b>\n\n"
@@ -86,8 +86,8 @@ async def process_subject(message: Message, state: FSMContext) -> None:
 
 @profile_router.message(ProfileForm.goal)
 async def process_goal(
-    message: Message, 
-    state: FSMContext, 
+    message: Message,
+    state: FSMContext,
     db_conn: AsyncConnection[DictRow]
 ) -> None:
     goal_text: Optional[str] = message.text.strip() if message.text else None
@@ -95,7 +95,7 @@ async def process_goal(
         goal_text = None
 
     data = await state.get_data()
-    
+
     await save_profile(
         conn=db_conn,
         telegram_id=message.from_user.id,

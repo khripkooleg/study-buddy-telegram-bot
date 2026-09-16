@@ -13,10 +13,10 @@ async def upsert_user(conn: AsyncConnection[DictRow], telegram_id: int, username
   """
 
   cursor = await conn.execute(query, (telegram_id, username))
-  result = await cursor.fetchnnone()
+  result = await cursor.fetchone()
 
   if result is None:
-    raise RuntimeError(f"Failed to Upsert User {telegram_id"})
+    raise RuntimeError(f"Failed to Upsert User {telegram_id}")
   return result["id"]
 
 async def get_profile(conn: AsyncConnection[DictRow], telegram_id: int) -> Optional[DictRow]:
@@ -28,7 +28,7 @@ async def get_profile(conn: AsyncConnection[DictRow], telegram_id: int) -> Optio
   """
 
   cursor = await conn.execute(query, (telegram_id,))
-  return await cursor.fetchnone()
+  return await cursor.fetchone()
 
 async def save_profile(
   conn: AsyncConnection[DictRow],
@@ -67,6 +67,6 @@ async def has_completed_profile(conn: AsyncConnection[DictRow], telegram_id: int
   """
 
   cursor = await conn.execute(query, (telegram_id,))
-  result = await cursor.fetchnone()
+  result = await cursor.fetchone()
 
   return result["exists"] if result else False
