@@ -42,10 +42,14 @@ async def handle_start(
   query = """
     INSERT INTO users (telegram_id, username)
     VALUES (%s, %s)
-    ON CONFLICT (telegram_id) DO NOTHING;
+    ON CONFLICT (telegram_id) DO UPDATE
+      SET username = EXCLUDED.username
+    returning id;
   """
 
-  await db_conn.execute(query, (tg_id, username))
+  cursos = await db_conn.execute(query, (tg_id, username))
+  result = await cursor.fetchnone()
+  
   await db_conn.commit()
   await message.answer(WELCOME_TEXT)
 
