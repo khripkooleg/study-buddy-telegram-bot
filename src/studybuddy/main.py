@@ -74,7 +74,7 @@ async def main() -> None:
 
   dispatcher.workflow_data.update({"db_pool": db_pool})
   dispatcher.update.middleware(DbSessionMiddleware())
-  dp.update.middleware(UserMiddleware())
+  dispatcher.update.middleware(UserMiddleware())
 
   dispatcher.include_router(core_router)
   dispatcher.include_router(profile_router)
