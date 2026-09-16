@@ -81,7 +81,7 @@ async def handle_search(
     await send_profile_card(message, matches[0])
 
 
-@search_router.message(SearchState.browsing, F.text == "Next")
+@search_router.message(SearchState.browsing, F.text == "Наступний")
 async def handle_next_match(message: Message, state: FSMContext) -> None:
     data = await state.get_data()
     matches = data.get("matches", [])
@@ -100,7 +100,7 @@ async def handle_next_match(message: Message, state: FSMContext) -> None:
     await send_profile_card(message, matches[current_index])
 
 
-@search_router.message(SearchState.browsing, F.text == "Go Back")
+@search_router.message(SearchState.browsing, F.text == "Назад")
 async def handle_go_back(
     message: Message,
     state: FSMContext,
