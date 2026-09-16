@@ -15,7 +15,7 @@ profile_router = Router(name="profile")
 
 def get_degree_keyboard():
   builder = InlineKeyboardBuilder()
-  for course in ["", "", "", "", ""]
+  for course in ["1 курс", "2 курс", "3 курс", "4 курс", "Магістр"]
     builder.button(text=course, callback_data=f"degree:{course}")
   builder.adjust(2)
   return builder.as_markup()
@@ -66,7 +66,7 @@ async def process_faculty(message: Message, state: FSMContext) -> None:
     await state.set_state(ProfileForm.degree)
 
     await message.answer(
-      "",
+      "Вкажи свій курс або освітній рівень:",
       reply_markup=get_degree_keyboard(),
     )
 
@@ -79,7 +79,7 @@ async def process_degree(callback: Callback Query, state: FSMContext) -> None:
 
   await callback.answer()
   await callback.message.answer(
-    ""
+    f"Обрано: <b>{selected_degree}</b>\n\nЯкий предмет зараз у пріоритеті для вивчення?"
   )
 
 
