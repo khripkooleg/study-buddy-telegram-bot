@@ -15,6 +15,7 @@ from psycopg.rows import DictRow
 from studybuddy.config import config
 from studybuddy.db.pool import create_pool
 from studybuddy.middlewares.db import DbSessionMiddleware
+from studybuddy.queries.profiles import upsert_user
 
 logger = logging.getLogger(__name__)
 
@@ -36,23 +37,16 @@ async def handle_start(
   message: Message,
   db_conn: AsyncConnection[DictRow]
 ) -> None:
-  tg_id = message.from_user.id
-  username = message.from_user.username
+  user_id = await upsert_user(
+    conn = db_conn,
+    telegram_id = message.from_user.id,
+    username = message.from_user.username
+  )
 
-  query = """
-    INSERT INTO users (telegram_id, username)
-    VALUES (%s, %s)
-    ON CONFLICT (telegram_id) DO UPDATE
-      SET username = EXCLUDED.username
-    returning id;
-  """
-
-  cursos = await db_conn.execute(query, (tg_id, username))
-  result = await cursor.fetchnone()
-  
   await db_conn.commit()
-  await message.answer(WELCOME_TEXT)
 
+  logger.info(f"User Synced: Telegram ID {message.from_user.id} -> Internal ID {user_id}")
+  await message.answer(WELCOME_TEXT)
 
 async def main() -> None:
   logging.basicConfig(
