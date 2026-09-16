@@ -46,7 +46,7 @@ async def handle_profile_start(
             f"👤 <b>Ім'я:</b> {existing['name']}\n"
             f"🏛 <b>Факультет:</b> {existing['faculty'].upper()}\n"
             f"🎓 <b>Курс:</b> {existing['degree']}\n"
-            f"📚 <b>Предмет:</b> {existing['subject'].title()}\n"
+            f"📚 <b>Спеціальність:</b> {existing['subject'].title()}\n"
             f"🎯 <b>Мета:</b> {existing['goal'] or 'Не вказано'}\n\n"
             f"Обери дію нижче:"
         )
