@@ -8,4 +8,4 @@ class ProfileForm(StatesGroup):
   goal = State()
 
 class SearchState(StatesGroup):
-  browsig = State()
+  browsing = State()

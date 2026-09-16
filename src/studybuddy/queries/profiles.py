@@ -84,21 +84,16 @@ async def find_matching_profiles(
         cross join current_user_profile cur
         where p.user_id != cur.user_id
           and p.is_active = true
-          and (
-              -- Rule 1: Same Faculty and Same Degree
-              (p.faculty = cur.faculty and p.degree = cur.degree)
-              or
-              -- Rule 2: Same Degree and Same Subject
-              (p.degree = cur.degree and p.subject = cur.subject)
-          )
+          and p.faculty = cur.faculty
+          and p.degree = cur.degree
         order by
-            (case when p.faculty = cur.faculty and p.degree = cur.degree and p.subject = cur.subject then 1 else 2 end)
+          (case when p.subject = cur.subject then 1 else 2 and)
         limit %s;
     """
 
     cursor = await conn.execute(query, (telegram_id, limit))
     return await cursor.fetchall()
-  
+ 
 async def has_completed_profile(conn: AsyncConnection[DictRow], telegram_id: int) -> bool:
   query = """
     select exists (

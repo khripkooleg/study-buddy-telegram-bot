@@ -105,7 +105,7 @@ async def process_subject(message: Message, state: FSMContext) -> None:
     await state.set_state(ProfileForm.goal)
     await message.answer(
         "Яка твоя мета підготовки? (наприклад: <i>Здати сесію, Підготувати лабораторну, Написати диплом</i>)\n\n"
-        "Або напиши <b>-</b> щоб пропустити."
+        "Або напиши '<b>-</b>' щоб пропустити."
     )
 
 
