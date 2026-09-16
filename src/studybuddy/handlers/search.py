@@ -39,7 +39,7 @@ async def send_profile_card(message: Message, match: dict) -> None:
         f"👤 <b>Ім'я:</b> {match['name']}\n"
         f"🏛 <b>Факультет:</b> {match['faculty'].upper()}\n"
         f"🎓 <b>Курс:</b> {match['degree'].upper()}\n"
-        f"📚 <b>Предмет:</b> {match['subject'].title()}\n"
+        f"📚 <b>Спеціальність:</b> {match['subject'].title()}\n"
         f"🎯 <b>Мета:</b> {match['goal'] or 'Не вказано'}\n\n"
         f"💬 <b>Зв'язок:</b> {username_str}"
     )
@@ -116,7 +116,7 @@ async def handle_go_back(
             f"👤 <b>Ім'я:</b> {existing['name']}\n"
             f"🏛 <b>Факультет:</b> {existing['faculty'].upper()}\n"
             f"🎓 <b>Курс:</b> {existing['degree'].upper()}\n"
-            f"📚 <b>Предмет:</b> {existing['subject'].title()}\n"
+            f"📚 <b>Спеціальність:</b> {existing['subject'].title()}\n"
             f"🎯 <b>Мета:</b> {existing['goal'] or 'Не вказано'}"
         )
         await message.answer(current_info, reply_markup=MAIN_MENU_KEYBOARD)
