@@ -85,9 +85,21 @@ async def find_matching_profiles(
     where p.user_id != cur.user_id
       and p.is_active = true
       and (
-        (p.faculty = cur.faculty AND p.degree = cur.degree)
+        (
+          p.faculty = cur.faculty
+          AND (
+                p.degree = cur.degree
+                or p.degree like '%' || cur.degree || '%'
+                or cur.degree like '%' || p.degree || '%'
+          )
+        )
         or
-        (p.degree = cur.degree and p.subject = cur.suject)
+        (
+          p.degree = cur.degree
+          or p.degree like '%' || cur.degree || '%'
+          or cur.degree like '%' || p.degree || '%'
+        )
+        and p.subject = cur.subject
       )
       order by
         (case when p.faculty = cur.faculty and p.degree = cur.degree and p.subject = cur.subject then 1 else 2 end)

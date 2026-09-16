@@ -4,18 +4,18 @@ from aiogram.types import Message
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow
 
-from studybuddy.queries.profile import get_profile, find_matching_profiles
+from studybuddy.queries.profiles import get_profile, find_matching_profiles
 
 search_router = Router(name="search")
 
 
 @search_router.message(Command("search"))
 async def handle_search(
-    message: Message, 
+    message: Message,
     db_conn: AsyncConnection[DictRow]
 ) -> None:
     telegram_id = message.from_user.id
-  
+
     user_profile = await get_profile(db_conn, telegram_id)
     if not user_profile or not user_profile["is_active"]:
         await message.answer(
@@ -37,7 +37,6 @@ async def handle_search(
 
     for match in matches:
         username_str = f"@{match['username']}" if match["username"] else f"tg://user?id={match['telegram_id']}"
-        
         card = (
             f"👤 <b>Ім'я:</b> {match['name']}\n"
             f"🏛 <b>Факультет:</b> {match['faculty'].upper()}\n"

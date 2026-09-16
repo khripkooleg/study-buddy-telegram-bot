@@ -1,9 +1,10 @@
 from typing import Optional
 
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery, Message
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow
 
@@ -11,6 +12,13 @@ from studybuddy.queries.profiles import get_profile, save_profile
 from studybuddy.states import ProfileForm
 
 profile_router = Router(name="profile")
+
+def get_degree_keyboard():
+  builder = InlineKeyboardBuilder()
+  for course in ["", "", "", "", ""]
+    builder.button(text=course, callback_data=f"degree:{course}")
+  builder.adjust(2)
+  return builder.as_markup()
 
 
 @profile_router.message(Command("profile"))
@@ -56,18 +64,23 @@ async def process_faculty(message: Message, state: FSMContext) -> None:
 
     await state.update_data(faculty=message.text.strip())
     await state.set_state(ProfileForm.degree)
-    await message.answer("Вкажи свій курс (наприклад: 1 курс):")
 
+    await message.answer(
+      "",
+      reply_markup=get_degree_keyboard(),
+    )
 
-@profile_router.message(ProfileForm.degree)
-async def process_degree(message: Message, state: FSMContext) -> None:
-    if not message.text or len(message.text.strip()) > 25:
-        await message.answer("Вкажи курс коротко (до 25 символів):")
-        return
+@profile_router.callback_query(ProfileForm.degree, F.data.startwith("degree:"))
+async def process_degree(callback: Callback Query, state: FSMContext) -> None:
+  selected_degree = callback.data.split(":")[1]
 
-    await state.update_data(degree=message.text.strip())
-    await state.set_state(ProfileForm.subject)
-    await message.answer("Який предмет зараз у пріоритеті для вивчення?")
+  await state.update_data(degree=selected_degree)
+  await state.set_state(ProfileForm.subject)
+
+  await callback.answer()
+  await callback.message.answer(
+    ""
+  )
 
 
 @profile_router.message(ProfileForm.subject)
