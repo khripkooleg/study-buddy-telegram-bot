@@ -65,10 +65,10 @@ async def save_profile(
         ),
     )
 
-  await conn.execute(
-    query,
-    (telegram_id, name.strip(), faculty.strip(), degree.strip(), subject.strip(), goal.strip() if goal else None)
-  )
+    await conn.execute(
+      query,
+      (telegram_id, name.strip(), faculty.strip(), degree.strip(), subject.strip(), goal.strip() if goal else None)
+    )
 
 async def find_matching_profiles(
     conn: AsyncConnection[DictRow],
