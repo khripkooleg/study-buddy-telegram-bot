@@ -82,7 +82,7 @@ async def process_faculty(message: Message, state: FSMContext) -> None:
       reply_markup=get_degree_keyboard(),
     )
 
-@profile_router.callback_query(ProfileForm.degree, F.data.startwith("degree:"))
+@profile_router.callback_query(ProfileForm.degree, F.data.startswith("degree:"))
 async def process_degree(callback: CallbackQuery, state: FSMContext) -> None:
   selected_degree = callback.data.split(":")[1]
 
