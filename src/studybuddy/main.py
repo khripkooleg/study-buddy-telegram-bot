@@ -17,6 +17,7 @@ from studybuddy.db.pool import create_pool
 from studybuddy.middlewares.db import DbSessionMiddleware
 from studybuddy.queries.profiles import upsert_user
 from studybuddy.handlers.profiles import profile_router
+from studybuddy.handlers.search import search_router
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,7 @@ async def main() -> None:
 
   dispatcher.include_router(core_router)
   dispatcher.include_router(profile_router)
+  dispatcher.include_router(search_router)
 
   async with Bot(
     token = config.bot.token.get_secret_value(),

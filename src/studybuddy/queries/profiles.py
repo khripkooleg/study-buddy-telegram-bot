@@ -43,7 +43,7 @@ async def save_profile(
     insert into profiles (user_id, name, faculty, degree, subject, goal)
     values (
       (select id from users where telegram_id = %s),
-      %s, %s, %s, %s, %s
+      %s,LOWER(%s), LOWER(%s), LOWER(%s), %s
     )
     on conflict (user_id) do update set
       name = excluded.name,
@@ -54,7 +54,48 @@ async def save_profile(
       is_active = true;
   """
 
-  await conn.execute(query, (telegram_id, name, faculty, degree, subject, goal))
+  await conn.execute(
+    query,
+    (telegram_id, name.strip(), faculty.strip(), degree.strip(), subject.strip(), goal.strip() if goal else None)
+  )
+
+async def find_matching_profiles(
+  conn: AsyncConnection[DictRow],
+  telegram_id: int,
+  limit: int = 10
+) -> list[DictRow]:
+  query = """
+    with current_user_profile AS (
+      select p.*
+      from profiles p
+      join users u on p.user_id = u.id
+      where u.telegram_id = %s and p.is_active = true
+    )
+    select
+      p.name,
+      p.faculty,
+      p.degree,
+      p.subject,
+      p.goal,
+      u.username,
+      u.telegram_id
+    from profiles p
+    join users u on p.user_id = u.id
+    cross join current_user_profile cur
+    where p.user_id != cur.user_id
+      and p.is_active = true
+      and (
+        (p.faculty = cur.faculty AND p.degree = cur.degree)
+        or
+        (p.degree = cur.degree and p.subject = cur.suject)
+      )
+      order by
+        (case when p.faculty = cur.faculty and p.degree = cur.degree and p.subject = cur.subject then 1 else 2 end)
+      limit %s;
+  """
+
+  cursor = await conn.execute(query, (telegram_id, limit))
+  return await cursor.fetchall()
 
 async def has_completed_profile(conn: AsyncConnection[DictRow], telegram_id: int) -> bool:
   query = """
