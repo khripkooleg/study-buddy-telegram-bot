@@ -8,8 +8,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow
 
-from studybuddy.queries.profiles import ( 
-  get_profile, save_profile, 
+from studybuddy.queries.profiles import (
+  get_profile, save_profile,
   deactivate_profile, delete_profile
 )
 from studybuddy.states import ProfileForm
@@ -18,7 +18,7 @@ profile_router = Router(name="profile")
 
 def get_degree_keyboard():
   builder = InlineKeyboardBuilder()
-  for course in ["1 курс", "2 курс", "3 курс", "4 курс", "Магістр"]
+  for course in ["1 курс", "2 курс", "3 курс", "4 курс", "Магістр"]:
     builder.button(text=course, callback_data=f"degree:{course}")
   builder.adjust(2)
   return builder.as_markup()
@@ -28,17 +28,17 @@ def get_profile_manage_keyboard():
     builder.button(text="✏️ Перезаповнити", callback_data="profile:refill")
     builder.button(text="🙈 Деактивувати", callback_data="profile:deactivate")
     builder.button(text="🗑 Видалити", callback_data="profile:delete")
-    builder.adjust(1) 
+    builder.adjust(1)
     return builder.as_markup()
 
 @profile_router.message(Command("profile"))
 async def handle_profile_start(
-    message: Message, 
-    state: FSMContext, 
+    message: Message,
+    state: FSMContext,
     db_conn: AsyncConnection[DictRow]
 ) -> None:
     existing = await get_profile(db_conn, message.from_user.id)
-    
+
     if existing:
         status_icon = "🟢 Активний" if existing["is_active"] else "🔴 Деактивований"
         current_info = (
@@ -83,7 +83,7 @@ async def process_faculty(message: Message, state: FSMContext) -> None:
     )
 
 @profile_router.callback_query(ProfileForm.degree, F.data.startwith("degree:"))
-async def process_degree(callback: Callback Query, state: FSMContext) -> None:
+async def process_degree(callback: CallbackQuery, state: FSMContext) -> None:
   selected_degree = callback.data.split(":")[1]
 
   await state.update_data(degree=selected_degree)
