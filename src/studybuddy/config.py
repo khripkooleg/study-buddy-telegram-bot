@@ -79,11 +79,11 @@ class Config(BaseModel):
       return cls(
         bot = BotConfig(token = SecretStr(os.getenv("BOT_TOKEN", ""))),
         db = DBConfig(
-          host = os.getenv("POSTGRES_HOST", "localhost"),
-          port = int(os.getenv("POSTGRES_PORT", "5432")),
-          name = os.getenv("POSTGRES_DB", ""),
-          user = os.getenv("POSTGRES_USER", ""),
-          password = SecretStr(os.getenv("POSTGRES_PASSWORD", "")),
+            host = os.getenv("DB_HOST", "localhost"),
+            port = int(os.getenv("DB_PORT", "5432")),
+            name = os.getenv("DB_NAME", ""),
+            user = os.getenv("DB_USER", ""),
+            password = SecretStr(os.getenv("DB_PASSWORD", "")),
         ),
         logging = LoggingConfig(level = os.getenv("LOG_LEVEL", "INFO")),
       )
