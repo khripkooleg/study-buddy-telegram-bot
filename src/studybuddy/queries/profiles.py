@@ -31,28 +31,39 @@ async def get_profile(conn: AsyncConnection[DictRow], telegram_id: int) -> Optio
   return await cursor.fetchone()
 
 async def save_profile(
-  conn: AsyncConnection[DictRow],
-  telegram_id: int,
-  name: str,
-  faculty: str,
-  degree: str,
-  subject: str,
-  goal: Optional[str]
+    conn: AsyncConnection[DictRow],
+    telegram_id: int,
+    name: str,
+    faculty: str,
+    degree: str,
+    subject: str,
+    goal: Optional[str]
 ) -> None:
-  query = """
-    insert into profiles (user_id, name, faculty, degree, subject, goal)
-    values (
-      (select id from users where telegram_id = %s),
-      %s,LOWER(%s), LOWER(%s), LOWER(%s), %s
+    query = """
+        insert into profiles (user_id, name, faculty, degree, subject, goal)
+        values (
+            (select id from users where telegram_id = %s),
+            %s, lower(%s), lower(%s), lower(%s), %s
+        )
+        on conflict (user_id) do update set
+            name = excluded.name,
+            faculty = excluded.faculty,
+            degree = excluded.degree,
+            subject = excluded.subject,
+            goal = excluded.goal,
+            is_active = true;
+    """
+    await conn.execute(
+        query,
+        (
+            telegram_id,
+            name.strip(),
+            faculty.strip(),
+            degree.strip(),
+            subject.strip(),
+            goal.strip() if goal else None,
+        ),
     )
-    on conflict (user_id) do update set
-      name = excluded.name,
-      faculty = excluded.faculty,
-      degree = excluded.degree,
-      subject = excluded.subject,
-      goal = excluded.goal,
-      is_active = true;
-  """
 
   await conn.execute(
     query,
