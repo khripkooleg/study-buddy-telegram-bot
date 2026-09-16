@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow
 
-from studybuddy.queries.profiles import get_profile, save_profile
+from studybuddy.queries.profiles import get_profile, save_profile, deactivate_profile, delete_profile
 from studybuddy.states import ProfileForm
 
 profile_router = Router(name="profile")
@@ -127,3 +127,36 @@ async def process_goal(
         "Тепер ти можеш шукати напарників для навчання за допомогою команди /search.",
         reply_markup=ReplyKeyboardRemove(),
     )
+
+@profile_router.message(Command("deactivate"))
+async def handle_deactivate(
+    message: Message, 
+    db_conn: AsyncConnection[DictRow]
+) -> None:
+    success = await deactivate_profile(db_conn, message.from_user.id)
+    await db_conn.commit()
+
+    if success:
+        await message.answer(
+            "🙈 <b>Твій профіль деактивовано!</b>\n\n"
+            "Тебе більше не видно у пошуку. Щоб відновити анкету, просто заповни її знову через /profile."
+        )
+    else:
+        await message.answer("⚠️ У тебе немає активного профілю для деактивації.")
+
+
+@profile_router.message(Command("deleteprofile"))
+async def handle_delete_profile(
+    message: Message, 
+    db_conn: AsyncConnection[DictRow]
+) -> None:
+    success = await delete_profile(db_conn, message.from_user.id)
+    await db_conn.commit()
+
+    if success:
+        await message.answer(
+            "🗑 <b>Твій профіль повністю видалено з бази даних.</b>\n\n"
+            "Якщо захочеш повернутися, ти завжди можеш створити новий через /profile."
+        )
+    else:
+        await message.answer("⚠️ У тебе немає створеного профілю для видалення.")
