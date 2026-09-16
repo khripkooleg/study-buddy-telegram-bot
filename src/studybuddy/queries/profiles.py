@@ -60,55 +60,45 @@ async def save_profile(
   )
 
 async def find_matching_profiles(
-  conn: AsyncConnection[DictRow],
-  telegram_id: int,
-  limit: int = 10
+    conn: AsyncConnection[DictRow],
+    telegram_id: int,
+    limit: int = 10
 ) -> list[DictRow]:
-  query = """
-    with current_user_profile AS (
-      select p.*
-      from profiles p
-      join users u on p.user_id = u.id
-      where u.telegram_id = %s and p.is_active = true
-    )
-    select
-      p.name,
-      p.faculty,
-      p.degree,
-      p.subject,
-      p.goal,
-      u.username,
-      u.telegram_id
-    from profiles p
-    join users u on p.user_id = u.id
-    cross join current_user_profile cur
-    where p.user_id != cur.user_id
-      and p.is_active = true
-      and (
-        (
-          p.faculty = cur.faculty
-          AND (
-                p.degree = cur.degree
-                or p.degree like '%' || cur.degree || '%'
-                or cur.degree like '%' || p.degree || '%'
+    query = """
+        with current_user_profile as (
+            select p.*
+            from profiles p
+            join users u on p.user_id = u.id
+            where u.telegram_id = %s and p.is_active = true
+        )
+        select
+            p.name,
+            p.faculty,
+            p.degree,
+            p.subject,
+            p.goal,
+            u.username,
+            u.telegram_id
+        from profiles p
+        join users u on p.user_id = u.id
+        cross join current_user_profile cur
+        where p.user_id != cur.user_id
+          and p.is_active = true
+          and (
+              -- Rule 1: Same Faculty and Same Degree
+              (p.faculty = cur.faculty and p.degree = cur.degree)
+              or
+              -- Rule 2: Same Degree and Same Subject
+              (p.degree = cur.degree and p.subject = cur.subject)
           )
-        )
-        or
-        (
-          p.degree = cur.degree
-          or p.degree like '%' || cur.degree || '%'
-          or cur.degree like '%' || p.degree || '%'
-        )
-        and p.subject = cur.subject
-      )
-      order by
-        (case when p.faculty = cur.faculty and p.degree = cur.degree and p.subject = cur.subject then 1 else 2 end)
-      limit %s;
-  """
+        order by
+            (case when p.faculty = cur.faculty and p.degree = cur.degree and p.subject = cur.subject then 1 else 2 end)
+        limit %s;
+    """
 
-  cursor = await conn.execute(query, (telegram_id, limit))
-  return await cursor.fetchall()
-
+    cursor = await conn.execute(query, (telegram_id, limit))
+    return await cursor.fetchall()
+  
 async def has_completed_profile(conn: AsyncConnection[DictRow], telegram_id: int) -> bool:
   query = """
     select exists (
