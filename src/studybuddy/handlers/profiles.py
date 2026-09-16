@@ -8,7 +8,10 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow
 
-from studybuddy.queries.profiles import get_profile, save_profile, deactivate_profile, delete_profile
+from studybuddy.queries.profiles import ( 
+  get_profile, save_profile, 
+  deactivate_profile, delete_profile
+)
 from studybuddy.states import ProfileForm
 
 profile_router = Router(name="profile")
@@ -20,26 +23,35 @@ def get_degree_keyboard():
   builder.adjust(2)
   return builder.as_markup()
 
+def get_profile_manage_keyboard():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✏️ Перезаповнити", callback_data="profile:refill")
+    builder.button(text="🙈 Деактивувати", callback_data="profile:deactivate")
+    builder.button(text="🗑 Видалити", callback_data="profile:delete")
+    builder.adjust(1) 
+    return builder.as_markup()
 
 @profile_router.message(Command("profile"))
 async def handle_profile_start(
-    message: Message,
-    state: FSMContext,
+    message: Message, 
+    state: FSMContext, 
     db_conn: AsyncConnection[DictRow]
 ) -> None:
     existing = await get_profile(db_conn, message.from_user.id)
-
+    
     if existing:
+        status_icon = "🟢 Активний" if existing["is_active"] else "🔴 Деактивований"
         current_info = (
-            f"<b>Твій поточний профіль:</b>\n\n"
+            f"<b>Твій поточний профіль ({status_icon}):</b>\n\n"
             f"👤 <b>Ім'я:</b> {existing['name']}\n"
-            f"🏛 <b>Факультет:</b> {existing['faculty']}\n"
-            f"🎓 <b>Курс/Ступінь:</b> {existing['degree']}\n"
-            f"📚 <b>Предмет:</b> {existing['subject']}\n"
+            f"🏛 <b>Факультет:</b> {existing['faculty'].upper()}\n"
+            f"🎓 <b>Курс:</b> {existing['degree']}\n"
+            f"📚 <b>Предмет:</b> {existing['subject'].title()}\n"
             f"🎯 <b>Мета:</b> {existing['goal'] or 'Не вказано'}\n\n"
-            f"Заповнимо профіль заново!"
+            f"Обери дію нижче:"
         )
-        await message.answer(current_info)
+        await message.answer(current_info, reply_markup=get_profile_manage_keyboard())
+        return
 
     await state.set_state(ProfileForm.name)
     await message.answer("Як до тебе звертатися? Введи своє ім'я:")
@@ -128,35 +140,43 @@ async def process_goal(
         reply_markup=ReplyKeyboardRemove(),
     )
 
-@profile_router.message(Command("deactivate"))
-async def handle_deactivate(
-    message: Message, 
+@profile_router.callback_query(F.data == "profile:refill")
+async def process_profile_refill(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(ProfileForm.name)
+    await callback.answer()
+    await callback.message.answer("Розпочнемо перезаповнення! Введи своє ім'я:")
+
+
+@profile_router.callback_query(F.data == "profile:deactivate")
+async def process_profile_deactivate(
+    callback: CallbackQuery, 
     db_conn: AsyncConnection[DictRow]
 ) -> None:
-    success = await deactivate_profile(db_conn, message.from_user.id)
+    success = await deactivate_profile(db_conn, callback.from_user.id)
     await db_conn.commit()
+    await callback.answer()
 
     if success:
-        await message.answer(
+        await callback.message.answer(
             "🙈 <b>Твій профіль деактивовано!</b>\n\n"
-            "Тебе більше не видно у пошуку. Щоб відновити анкету, просто заповни її знову через /profile."
+            "Тебе більше не буде видно у пошуку. Щоб відновити анкету, просто натисни /profile та перествори її."
         )
     else:
-        await message.answer("⚠️ У тебе немає активного профілю для деактивації.")
+        await callback.message.answer("⚠️ Не вдалося деактивувати профіль.")
 
 
-@profile_router.message(Command("deleteprofile"))
-async def handle_delete_profile(
-    message: Message, 
+@profile_router.callback_query(F.data == "profile:delete")
+async def process_profile_delete(
+    callback: CallbackQuery, 
     db_conn: AsyncConnection[DictRow]
 ) -> None:
-    success = await delete_profile(db_conn, message.from_user.id)
+    success = await delete_profile(db_conn, callback.from_user.id)
     await db_conn.commit()
+    await callback.answer()
 
     if success:
-        await message.answer(
-            "🗑 <b>Твій профіль повністю видалено з бази даних.</b>\n\n"
-            "Якщо захочеш повернутися, ти завжди можеш створити новий через /profile."
+        await callback.message.answer(
+            "🗑 <b>Твій профіль повністю видалено з бази даних.</b>"
         )
     else:
-        await message.answer("⚠️ У тебе немає створеного профілю для видалення.")
+        await callback.message.answer("⚠️ Не вдалося видалити профіль.")
