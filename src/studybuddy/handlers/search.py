@@ -5,6 +5,7 @@ from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow
 
+import random
 from studybuddy.queries.profiles import find_matching_profiles, get_profile
 from studybuddy.states import SearchState
 
@@ -53,7 +54,7 @@ async def handle_search(
     state: FSMContext,
     db_conn: AsyncConnection[DictRow],
 ) -> None:
-    telegram_id = message.from_user.id
+    telegram_id = message.from_user.id # type: ignore
 
     user_profile = await get_profile(db_conn, telegram_id)
     if not user_profile or not user_profile["is_active"]:
@@ -73,6 +74,12 @@ async def handle_search(
             reply_markup=MAIN_MENU_KEYBOARD,
         )
         return
+
+    same_subject = [m for m in matches if m["subject"] == user_profile["subject"]]
+    other = [m for m in matches if m["subject"] != user_profile["subject"]]
+    random.shuffle(same_subject)
+    random.shuffle(other)
+    matches = same_subject + other
 
     await state.set_state(SearchState.browsing)
     await state.update_data(matches=matches, index=0)
@@ -107,7 +114,7 @@ async def handle_go_back(
     db_conn: AsyncConnection[DictRow],
 ) -> None:
     await state.clear()
-    existing = await get_profile(db_conn, message.from_user.id)
+    existing = await get_profile(db_conn, message.from_user.id) # type: ignore
 
     if existing:
         status_icon = "🟢 Активний" if existing["is_active"] else "🔴 Деактивований"
