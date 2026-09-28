@@ -98,7 +98,8 @@ async def find_matching_profiles(
           and p.faculty = cur.faculty
           and p.degree = cur.degree
         order by
-          (case when p.subject = cur.subject then 1 else 2 end)
+          (case when p.subject = cur.subject then 1 else 2 end),
+          random()
         limit %s;
     """
 
